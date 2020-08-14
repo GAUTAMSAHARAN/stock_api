@@ -35,3 +35,11 @@ class EichermotorsSerializers(serializers.ModelSerializer):
     class Meta:
         model = models.Eichermotors
         fields = "__all__"
+
+class YearSerializer(serializers.Serializer):
+    year = serializers.IntegerField()
+
+
+class CombineSerializers(serializers.Serializer):
+    current = NiftySerializers()
+    previous = NiftySerializers()
