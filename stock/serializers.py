@@ -37,9 +37,12 @@ class EichermotorsSerializers(serializers.ModelSerializer):
         fields = "__all__"
 
 class YearSerializer(serializers.Serializer):
-    year = serializers.IntegerField()
-
+    Low = serializers.FloatField()
+    High = serializers.FloatField()
 
 class CombineSerializers(serializers.Serializer):
     current = NiftySerializers()
     previous = NiftySerializers()
+    year = YearSerializer(many=True)
+
+

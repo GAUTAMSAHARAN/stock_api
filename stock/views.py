@@ -13,7 +13,7 @@ from datetime import datetime, timedelta
 from django.db.models import Avg, Max, Min, Sum
 
 
-Combine = namedtuple('Combine', ('current', 'previous'))
+Combine = namedtuple('Combine', ('current', 'previous', 'year'))
 particular_date = datetime(2020, 8, 13)
 previous_date = particular_date - timedelta(days = 1)
 starting_date = particular_date - timedelta(days=365)
@@ -24,12 +24,46 @@ class AshokleyViewSet(viewsets.ModelViewSet):
     queryset = models.Ashokley.objects.all()
     serializer_class = serializers.AshokleySerializers
 
-
     @action(methods=['get',], detail=False, url_path='day', url_name='day')
     def get_day(self, request):
-        particular_date = datetime(2020, 8, 13)
-        data = models.Ashokley.objects.filter(Low == 1000)
+        data = models.Ashokley.objects.get(Date = particular_date)
         serialized = serializers.AshokleySerializers(data)
+        return Response(serialized.data)
+    
+    @action(methods=['get',], detail=False, url_path='week', url_name='week')
+    def get_week(self, request):
+        data = models.Ashokley.objects.filter(Date__gte = particular_date-timedelta(days=7))
+        serialized = serializers.AshokleySerializers(data, many=True)
+        return Response(serialized.data)
+    
+    @action(methods=['get',], detail=False, url_path='month', url_name='month')
+    def get_month(self, request):
+        data = models.Ashokley.objects.filter(Date__gte = particular_date-timedelta(days=30))
+        serialized = serializers.AshokleySerializers(data, many=True)
+        return Response(serialized.data)
+
+    @action(methods=['get',], detail=False, url_path='threemonth', url_name='threemonth')
+    def get_three_month(self, request):
+        data = models.Ashokley.objects.filter(Date__gte = particular_date-timedelta(days=90))
+        serialized = serializers.AshokleySerializers(data, many=True)
+        return Response(serialized.data)
+
+    @action(methods=['get',], detail=False, url_path='sixmonth', url_name='sixmonth')
+    def get_six_month(self, request):
+        data = models.Ashokley.objects.filter(Date__gte = particular_date-timedelta(days=180))
+        serialized = serializers.AshokleySerializers(data, many=True)
+        return Response(serialized.data)
+
+    @action(methods=['get',], detail=False, url_path='year', url_name='year')
+    def get_year(self, request):
+        data = models.Ashokley.objects.filter(Date__gte = particular_date-timedelta(days=365))
+        serialized = serializers.AshokleySerializers(data, many=True)
+        return Response(serialized.data)
+
+    @action(methods=['get',], detail=False, url_path='fiveyear', url_name='fiveyear')
+    def get_five_year(self, request):
+        data = models.Ashokley.objects.filter(Date__gte = particular_date-timedelta(days=1825))
+        serialized = serializers.AshokleySerializers(data, many=True)
         return Response(serialized.data)
 
 class SensexViewSet(viewsets.ModelViewSet):
@@ -46,9 +80,11 @@ class SensexViewSet(viewsets.ModelViewSet):
         year_low = data.aggregate(Min('Low'))
         current_data = models.Sensex.objects.get(Date = particular_date)
         previous_data = models.Sensex.objects.get(Date = previous_date)
+        year = [{'Low': year_low.get('Low__min'), 'High': year_high.get('High__max')}]
         combine = Combine(
             current=current_data,
             previous=previous_data,
+            year=year,
         )
         serializer = serializers.CombineSerializers(combine)
         return Response(serializer.data)
@@ -57,6 +93,48 @@ class CiplaViewSet(viewsets.ModelViewSet):
     queryset = models.Cipla.objects.all()
     serializer_class = serializers.CiplaSerializers
 
+    @action(methods=['get',], detail=False, url_path='day', url_name='day')
+    def get_day(self, request):
+        data = models.Cipla.objects.get(Date = particular_date)
+        serialized = serializers.AshokleySerializers(data)
+        return Response(serialized.data)
+    
+    @action(methods=['get',], detail=False, url_path='week', url_name='week')
+    def get_week(self, request):
+        data = models.Cipla.objects.filter(Date__gte = particular_date-timedelta(days=7))
+        serialized = serializers.AshokleySerializers(data, many=True)
+        return Response(serialized.data)
+    
+    @action(methods=['get',], detail=False, url_path='month', url_name='month')
+    def get_month(self, request):
+        data = models.Cipla.objects.filter(Date__gte = particular_date-timedelta(days=30))
+        serialized = serializers.AshokleySerializers(data, many=True)
+        return Response(serialized.data)
+
+    @action(methods=['get',], detail=False, url_path='threemonth', url_name='threemonth')
+    def get_three_month(self, request):
+        data = models.Cipla.objects.filter(Date__gte = particular_date-timedelta(days=90))
+        serialized = serializers.AshokleySerializers(data, many=True)
+        return Response(serialized.data)
+
+    @action(methods=['get',], detail=False, url_path='sixmonth', url_name='sixmonth')
+    def get_six_month(self, request):
+        data = models.Cipla.objects.filter(Date__gte = particular_date-timedelta(days=180))
+        serialized = serializers.AshokleySerializers(data, many=True)
+        return Response(serialized.data)
+
+    @action(methods=['get',], detail=False, url_path='year', url_name='year')
+    def get_year(self, request):
+        data = models.Cipla.objects.filter(Date__gte = particular_date-timedelta(days=365))
+        serialized = serializers.AshokleySerializers(data, many=True)
+        return Response(serialized.data)
+
+    @action(methods=['get',], detail=False, url_path='fiveyear', url_name='fiveyear')
+    def get_five_year(self, request):
+        data = models.Cipla.objects.filter(Date__gte = particular_date-timedelta(days=1825))
+        serialized = serializers.AshokleySerializers(data, many=True)
+        return Response(serialized.data)
+
 class NiftyViewSet(viewsets.ModelViewSet):
     queryset = models.Nifty.objects.all()
     serializer_class = serializers.NiftySerializers
@@ -64,16 +142,17 @@ class NiftyViewSet(viewsets.ModelViewSet):
 
     @action(methods=['get', ], detail=False, url_path='niftydata', url_name='niftydata')
     def get_nifty(self, request):
-        data = models.Nifty.objects.filter(DateRange(Date, particular_date))
-        year_high =  data.objects.all().aggregate(Max('High'))
-        year_low = data.objects.all().aggregate(Min('Low'))
-        current_data = models.Nifty.objects.filter(Date == particular_date)
-        previous_data = models.Nifty.objects.filter(Date == previous_data )
+        data = models.Nifty.objects.filter(Date__gte = starting_date)
+        results = serializers.NiftySerializers(data, many = True)
+        year_high =  data.aggregate(Max('High'))
+        year_low = data.aggregate(Min('Low'))
+        current_data = models. Nifty.objects.get(Date = particular_date)
+        previous_data = models.Nifty.objects.get(Date = previous_date)
+        year = [{'Low': year_low.get('Low__min'), 'High': year_high.get('High__max')}]
         combine = Combine(
             current=current_data,
             previous=previous_data,
-            year_low=year_low,
-            year_high=year_high,
+            year=year,
         )
         serializer = serializers.CombineSerializers(combine)
         return Response(serializer.data)
@@ -84,10 +163,136 @@ class RelianceViewSet(viewsets.ModelViewSet):
     queryset = models.Reliance.objects.all()
     serializer_class = serializers.RelianceSerializers
 
+    @action(methods=['get',], detail=False, url_path='day', url_name='day')
+    def get_day(self, request):
+        data = models.Reliance.objects.get(Date = particular_date)
+        serialized = serializers.AshokleySerializers(data)
+        return Response(serialized.data)
+    
+    @action(methods=['get',], detail=False, url_path='week', url_name='week')
+    def get_week(self, request):
+        data = models.Reliance.objects.filter(Date__gte = particular_date-timedelta(days=7))
+        serialized = serializers.AshokleySerializers(data, many=True)
+        return Response(serialized.data)
+    
+    @action(methods=['get',], detail=False, url_path='month', url_name='month')
+    def get_month(self, request):
+        data = models.Reliance.objects.filter(Date__gte = particular_date-timedelta(days=30))
+        serialized = serializers.AshokleySerializers(data, many=True)
+        return Response(serialized.data)
+
+    @action(methods=['get',], detail=False, url_path='threemonth', url_name='threemonth')
+    def get_three_month(self, request):
+        data = models.Reliance.objects.filter(Date__gte = particular_date-timedelta(days=90))
+        serialized = serializers.AshokleySerializers(data, many=True)
+        return Response(serialized.data)
+
+    @action(methods=['get',], detail=False, url_path='sixmonth', url_name='sixmonth')
+    def get_six_month(self, request):
+        data = models.Reliance.objects.filter(Date__gte = particular_date-timedelta(days=180))
+        serialized = serializers.AshokleySerializers(data, many=True)
+        return Response(serialized.data)
+
+    @action(methods=['get',], detail=False, url_path='year', url_name='year')
+    def get_year(self, request):
+        data = models.Reliance.objects.filter(Date__gte = particular_date-timedelta(days=365))
+        serialized = serializers.AshokleySerializers(data, many=True)
+        return Response(serialized.data)
+
+    @action(methods=['get',], detail=False, url_path='fiveyear', url_name='fiveyear')
+    def get_five_year(self, request):
+        data = models.Reliance.objects.filter(Date__gte = particular_date-timedelta(days=1825))
+        serialized = serializers.AshokleySerializers(data, many=True)
+        return Response(serialized.data)
+
 class TatasteelViewSet(viewsets.ModelViewSet):
     queryset = models.Tatasteel.objects.all()
     serializer_class = serializers.RelianceSerializers
 
+    @action(methods=['get',], detail=False, url_path='day', url_name='day')
+    def get_day(self, request):
+        data = models.Tatasteel.objects.get(Date = particular_date)
+        serialized = serializers.AshokleySerializers(data)
+        return Response(serialized.data)
+    
+    @action(methods=['get',], detail=False, url_path='week', url_name='week')
+    def get_week(self, request):
+        data = models.Tatasteel.objects.filter(Date__gte = particular_date-timedelta(days=7))
+        serialized = serializers.AshokleySerializers(data, many=True)
+        return Response(serialized.data)
+    
+    @action(methods=['get',], detail=False, url_path='month', url_name='month')
+    def get_month(self, request):
+        data = models.Tatasteel.objects.filter(Date__gte = particular_date-timedelta(days=30))
+        serialized = serializers.AshokleySerializers(data, many=True)
+        return Response(serialized.data)
+
+    @action(methods=['get',], detail=False, url_path='threemonth', url_name='threemonth')
+    def get_three_month(self, request):
+        data = models.Tatasteel.objects.filter(Date__gte = particular_date-timedelta(days=90))
+        serialized = serializers.AshokleySerializers(data, many=True)
+        return Response(serialized.data)
+
+    @action(methods=['get',], detail=False, url_path='sixmonth', url_name='sixmonth')
+    def get_six_month(self, request):
+        data = models.Tatasteel.objects.filter(Date__gte = particular_date-timedelta(days=180))
+        serialized = serializers.AshokleySerializers(data, many=True)
+        return Response(serialized.data)
+
+    @action(methods=['get',], detail=False, url_path='year', url_name='year')
+    def get_year(self, request):
+        data = models.Tatasteel.objects.filter(Date__gte = particular_date-timedelta(days=365))
+        serialized = serializers.AshokleySerializers(data, many=True)
+        return Response(serialized.data)
+
+    @action(methods=['get',], detail=False, url_path='fiveyear', url_name='fiveyear')
+    def get_five_year(self, request):
+        data = models.Tatasteel.objects.filter(Date__gte = particular_date-timedelta(days=1825))
+        serialized = serializers.AshokleySerializers(data, many=True)
+        return Response(serialized.data)
+
 class EichermotorsViewSet(viewsets.ModelViewSet):
     queryset = models.Eichermotors.objects.all()
     serializer_class = serializers.RelianceSerializers
+
+    @action(methods=['get',], detail=False, url_path='day', url_name='day')
+    def get_day(self, request):
+        data = models.Eichermotors.objects.get(Date = particular_date)
+        serialized = serializers.AshokleySerializers(data)
+        return Response(serialized.data)
+    
+    @action(methods=['get',], detail=False, url_path='week', url_name='week')
+    def get_week(self, request):
+        data = models.Eichermotors.objects.filter(Date__gte = particular_date-timedelta(days=7))
+        serialized = serializers.AshokleySerializers(data, many=True)
+        return Response(serialized.data)
+    
+    @action(methods=['get',], detail=False, url_path='month', url_name='month')
+    def get_month(self, request):
+        data = models.Eichermotors.objects.filter(Date__gte = particular_date-timedelta(days=30))
+        serialized = serializers.AshokleySerializers(data, many=True)
+        return Response(serialized.data)
+
+    @action(methods=['get',], detail=False, url_path='threemonth', url_name='threemonth')
+    def get_three_month(self, request):
+        data = models.Eichermotors.objects.filter(Date__gte = particular_date-timedelta(days=90))
+        serialized = serializers.AshokleySerializers(data, many=True)
+        return Response(serialized.data)
+
+    @action(methods=['get',], detail=False, url_path='sixmonth', url_name='sixmonth')
+    def get_six_month(self, request):
+        data = models.Eichermotors.objects.filter(Date__gte = particular_date-timedelta(days=180))
+        serialized = serializers.AshokleySerializers(data, many=True)
+        return Response(serialized.data)
+
+    @action(methods=['get',], detail=False, url_path='year', url_name='year')
+    def get_year(self, request):
+        data = models.Eichermotors.objects.filter(Date__gte = particular_date-timedelta(days=365))
+        serialized = serializers.AshokleySerializers(data, many=True)
+        return Response(serialized.data)
+
+    @action(methods=['get',], detail=False, url_path='fiveyear', url_name='fiveyear')
+    def get_five_year(self, request):
+        data = models.Eichermotors.objects.filter(Date__gte = particular_date-timedelta(days=1825))
+        serialized = serializers.AshokleySerializers(data, many=True)
+        return Response(serialized.data)

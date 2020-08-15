@@ -64,4 +64,3 @@ class Eichermotors(models.Model):
     Volume = models.FloatField(blank = False)
     Date = models.DateTimeField()
 
-
