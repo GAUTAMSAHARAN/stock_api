@@ -13,6 +13,7 @@ router.register(r'nifty', views.NiftyViewSet)
 router.register(r'reliance', views.RelianceViewSet)
 router.register(r'tatasteel', views.TatasteelViewSet)
 router.register(r'eichermotors', views.EichermotorsViewSet)
+router.register(r'user',views.UserView)
 
 urlpatterns = [
     path('', include(router.urls)),

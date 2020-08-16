@@ -1,4 +1,5 @@
 from rest_framework import serializers
+from django.contrib.auth.models import User
 from stock import models
 
 class AshokleySerializers(serializers.ModelSerializer):
@@ -45,4 +46,8 @@ class CombineSerializers(serializers.Serializer):
     previous = NiftySerializers()
     year = YearSerializer(many=True)
 
+class UserSerializers(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ['username','first_name','last_name','password','email']
 

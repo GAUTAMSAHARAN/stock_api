@@ -11,7 +11,9 @@ from rest_framework.decorators import action
 from collections import namedtuple
 from datetime import datetime, timedelta
 from django.db.models import Avg, Max, Min, Sum
-
+from django.contrib.auth.models import User
+from django.http import JsonResponse
+from rest_framework.authtoken.models import Token
 
 Combine = namedtuple('Combine', ('current', 'previous', 'year'))
 particular_date = datetime(2020, 8, 13)
@@ -69,8 +71,6 @@ class AshokleyViewSet(viewsets.ModelViewSet):
 class SensexViewSet(viewsets.ModelViewSet):
     queryset = models.Sensex.objects.all()
     serializer_class = serializers.SensexSerializers
-
-
 
     @action(methods=['get', ], detail=False, url_path='data', url_name='data')
     def get_sensex(self, request):
@@ -138,7 +138,6 @@ class CiplaViewSet(viewsets.ModelViewSet):
 class NiftyViewSet(viewsets.ModelViewSet):
     queryset = models.Nifty.objects.all()
     serializer_class = serializers.NiftySerializers
-
 
     @action(methods=['get', ], detail=False, url_path='niftydata', url_name='niftydata')
     def get_nifty(self, request):
@@ -296,3 +295,44 @@ class EichermotorsViewSet(viewsets.ModelViewSet):
         data = models.Eichermotors.objects.filter(Date__gte = particular_date-timedelta(days=1825))
         serialized = serializers.AshokleySerializers(data, many=True)
         return Response(serialized.data)
+
+class UserView(viewsets.ModelViewSet):
+    queryset=User.objects.all()
+    serializer_class = serializers.UserSerializers
+    
+    def create(self, request):
+        try:
+            user = User.objects.get(email=request.data['email'])
+            if user:
+                return Response("user with current email already exists")
+        except User.DoesNotExist:
+            user = User(email=request.data['email'],username=request.data['username'],first_name=request.data['first_name'],password=request.data['password'])
+            user.save()
+
+        try:
+            token = Token.objects.get(user=user)
+        except Token.DoesNotExist:
+            token = Token.objects.create(user=user)
+
+        res = {
+            "token": token.key,
+            "user_data": serializers.UserSerializers(user).data
+        }
+        return JsonResponse(res)
+    
+    @action(methods=['post'],detail=False,url_name='login',url_path='login')
+    def login(self,request):
+        try:
+            user = User.objects.get(email=request.data['email'],password=request.data['password'])
+            try:
+                token = Token.objects.get(user=user)
+            except Token.DoesNotExist:
+                token = Token.objects.create(user=user)
+            
+            res = {
+                "token":token.key,
+                "user_data":serializers.UserSerializers(user).data
+            }
+            return JsonResponse(res)
+        except User.DoesNotExist:
+            return Response("your username or password is incorrect")
